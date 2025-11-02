@@ -1,0 +1,55 @@
+# === Build artifacts ===
+bin/
+obj/
+out/
+Debug/
+Release/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+
+# === User-specific files ===
+*.user
+*.suo
+*.userosscache
+*.userprefs
+
+# === Visual Studio specific ===
+.vs/
+*.dbmdl
+*.jfm
+*.VC.db
+*.VC.VC.opendb
+
+# === Visual Studio Code specific ===
+.vscode/
+*.code-workspace
+
+# === NuGet packages ===
+*.nupkg
+packages/
+*.snupkg
+*.nuspec
+
+# === Temporary files ===
+*.tmp
+*.temp
+*.bak
+*.swp
+*.sln.docstates
+
+# === OS-specific ===
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+
+# === Environment/config ===
+appsettings.Development.json
+.env
