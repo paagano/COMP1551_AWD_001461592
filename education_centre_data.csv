@@ -1,0 +1,4 @@
+Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+1,Teacher,Olivia Agano,0749875667,olivia@gmail.com,800000,Kiswahili,English,,,
+2,Admin,Anaya Agano,0739828894,anaya@gmail.com,900000,,,,Full-time,8
+3,Student,Ori Agano,07409875667,ori@hotmail.com,,Mathematics,Science,Geography,,

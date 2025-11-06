@@ -4,23 +4,24 @@
 // This application manages Teachers, Admins, and Students records
 // Demonstrates OOP concepts: Inheritance, Encapsulation, Polymorphism
 // Uses a console-based menu for user interaction
-// Data is stored in-memory using a List<Person> for simplicity
+// Data is persisted in a CSV file using StreamReader and StreamWriter classes
 // No external libraries or databases are used
 
-using System;
+using System; // Imports the core system namespace for basic functionalities
 using System.Collections.Generic; // Imports the generic collections namespace so I can use List<T>
+using System.IO; // For file Input/Output operations (StreamReader and StreamWriter)
 
 // =============================
 //  BASE CLASS: Person
 // =============================
 
-// Abstract base class representing a generic person i.e cannot create new Person() directly. it’s intended to be inherited.
+// Abstract base class representing a generic person i.e cannot create new Person() directly. it's intended to be inherited.
 // Encapsulates common fields and methods for derived classes
 // Implements polymorphism via virtual methods
 // Inheritance is used to create specific person types (Teacher, Admin, Student)
 public abstract class Person
 {
-    // Private fields (Encapsulated i.e can’t be accessed directly from outside the Person class.)
+    // Private fields (Encapsulated i.e can't be accessed directly from outside the Person class.)
     // Common fields for all derived classes (Id, Name, Telephone, Email, Role)
     // Id is unique identifier, set only once in constructor
     private int id;
@@ -67,7 +68,7 @@ public abstract class Person
             }
         }
 
-        //Alternative concise syntax:
+        //Alternative concise syntax (I discovered this after further research) - null-conditional operator and null-coalescing operator
         //set => telephone = value?.Trim() ?? string.Empty;
     }
 
@@ -126,6 +127,23 @@ public abstract class Person
         Console.Write($"Enter new email (OR Leave blank and press Enter to keep as '{Email}'): ");
         input = Console.ReadLine();
         if (!string.IsNullOrWhiteSpace(input)) Email = input;
+    }
+
+    // NEW: Virtual method to convert object to CSV format for file storage
+    // Derived classes will override this to include their specific fields
+    public virtual string ToCsvString()
+    {
+        return $"{Id},{Role},{Name},{Telephone},{Email}";
+    }
+
+    // NEW: Virtual method to populate object from CSV data
+    // Derived classes will override this to handle their specific fields
+    public virtual void FromCsv(string[] fields)
+    {
+        // Skip Id and Role as they are set in constructor
+        Name = fields[2];
+        Telephone = fields[3];
+        Email = fields[4];
     }
 }
 
@@ -208,6 +226,30 @@ public class Teacher : Person
                 Subject2 = input;
             };
     }
+
+    // NEW: Override method to convert Teacher object to CSV format with specific field names
+    public override string ToCsvString()
+    {
+        // NEW FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+        return $"{base.ToCsvString()},{Salary},{Subject1},{Subject2},,,";
+        // Empty fields for: Subject3, EmploymentType, WorkingHours (Teacher doesn't use these)
+    }
+
+    // NEW: Override method to populate Teacher object from CSV data
+    public override void FromCsv(string[] fields)
+    {
+        base.FromCsv(fields); // Handle common fields first
+        
+        // NEW FIELD MAPPING for Teacher:
+        // 5: Salary, 6: Subject1, 7: Subject2
+        if (fields.Length >= 8) // Ensure we have enough fields
+        {
+            if (double.TryParse(fields[5], out double salary)) Salary = salary;
+            Subject1 = fields[6];
+            Subject2 = fields[7];
+            // Fields 8, 9, 10 are not used by Teacher (Subject3, EmploymentType, WorkingHours)
+        }
+    }
 }
 
 // =============================
@@ -283,6 +325,30 @@ public class Admin : Person
             {
                 WorkingHours = h;
             };
+    }
+
+    // NEW: Override method to convert Admin object to CSV format with specific field names
+    public override string ToCsvString()
+    {
+        // NEW FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+        return $"{base.ToCsvString()},{Salary},,,,{EmploymentType},{WorkingHours}";
+        // Empty fields for: Subject1, Subject2, Subject3 (Admin doesn't use these)
+    }
+
+    // NEW: Override method to populate Admin object from CSV data
+    public override void FromCsv(string[] fields)
+    {
+        base.FromCsv(fields); // Handle common fields first
+        
+        // NEW FIELD MAPPING for Admin:
+        // 5: Salary, 9: EmploymentType, 10: WorkingHours
+        if (fields.Length >= 11) // Ensure we have enough fields
+        {
+            if (double.TryParse(fields[5], out double salary)) Salary = salary;
+            EmploymentType = fields[9];
+            if (int.TryParse(fields[10], out int hours)) WorkingHours = hours;
+            // Fields 6, 7, 8 are not used by Admin (Subject1, Subject2, Subject3)
+        }
     }
 }
 
@@ -362,6 +428,30 @@ public class Student : Person
             };
         
     }
+
+    // NEW: Override method to convert Student object to CSV format with specific field names
+    public override string ToCsvString()
+    {
+        // NEW FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+        return $"{base.ToCsvString()},,{Subject1},{Subject2},{Subject3},,";
+        // Empty fields for: Salary, EmploymentType, WorkingHours (Student doesn't use these)
+    }
+
+    // NEW: Override method to populate Student object from CSV data
+    public override void FromCsv(string[] fields)
+    {
+        base.FromCsv(fields); // Handle common fields first
+        
+        // NEW FIELD MAPPING for Student:
+        // 6: Subject1, 7: Subject2, 8: Subject3
+        if (fields.Length >= 9) // Ensure we have enough fields
+        {
+            Subject1 = fields[6];
+            Subject2 = fields[7];
+            Subject3 = fields[8];
+            // Fields 5, 9, 10 are not used by Student (Salary, EmploymentType, WorkingHours)
+        }
+    }
 }
 
 
@@ -378,9 +468,15 @@ class Program
 
     static int nextId = 1; // A counter to assign unique IDs
 
+    // NEW: Constant for CSV file name
+    private const string DataFileName = "education_centre_data.csv";
+
     // Main method
     static void Main()
     {
+        // NEW: Load existing data from CSV file when program starts
+        LoadDataFromFile();
+
         bool exit = false; // controls the main loop. Exits when true.
 
         // Main loop for menu. Exits when user chooses to.(Option 6)
@@ -402,7 +498,7 @@ class Program
             Console.WriteLine("3. View records by Role");
             Console.WriteLine("4. Edit existing record");
             Console.WriteLine("5. Delete existing record");
-            Console.WriteLine("6. Exit");
+            Console.WriteLine("6. Exit Application");
             Console.WriteLine();
             Console.Write("Select an option (1–6): ");
 
@@ -438,9 +534,12 @@ class Program
             }
         }
 
+        // NEW: Save data to CSV file when program exits
+        SaveDataToFile();
+
         // Exit message
         Console.WriteLine("Exiting System... Goodbye!");
-        Console.Beep(); // Audible feedback on exit
+        Console.Beep(); // Audible feedback on exit - I'm including this jus for fun.
     }
 
     // ==============================
@@ -553,6 +652,10 @@ class Program
 
         // Finally, store the new person in the list
         people.Add(person);
+        
+        // NEW: Save data to file after adding new record to ensure persistence
+        SaveDataToFile();
+        
         Console.WriteLine($"\nRecord added successfully! Assigned ID: {person.Id}");
     }
 
@@ -652,6 +755,10 @@ static void ViewRecordsByRole()
 
         // If record is found, Call the edit method (polymorphic)
         person.EditCommonFields();
+        
+        // NEW: Save data to file after editing to ensure persistence
+        SaveDataToFile();
+        
         Console.WriteLine();
         Console.WriteLine("Record updated successfully.");
     }
@@ -694,6 +801,10 @@ static void ViewRecordsByRole()
         {
             case "1":
                 people.Remove(person);
+                
+                // NEW: Save data to file after deletion to ensure persistence
+                SaveDataToFile();
+                
                 Console.WriteLine("Record deleted successfully.\n");
                 break;
 
@@ -707,17 +818,140 @@ static void ViewRecordsByRole()
         }
     }
 
-        // -----------------------------------------------------------
-        // Helper method to print table header for better readability. 
-        // Used in ViewAllRecords and ViewRecordsByRole methods
-        // Enhances the display of records in a tabular format
-        // I implemented this after further research on C# console output formatting
-        // -----------------------------------------------------------
-        static void PrintTableHeader()
+    // ==============================================
+    // FILE INPUT/OUTPUT METHODS FOR DATA PERSISTENCE
+    // ==============================================
+
+    // ---------------------------------------------------------------------------------
+    // FILE INPUT/OUTPUT METHOD 1: For saving all records to CSV file using StreamWriter
+    // This method writes each person's data to a CSV file in a structured format
+    // ---------------------------------------------------------------------------------
+    static void SaveDataToFile()
+    {
+        try
         {
-            Console.WriteLine("\n------------------------------------------------------------------------------");
-            Console.WriteLine($"{"ID",-5} | {"Role",-10} | {"Name",-20} | {"Telephone",-12} | {"Email",-25}"); // Table Header
-            Console.WriteLine("------------------------------------------------------------------------------");
+            // Using StreamWriter to write data to file
+            // The "using" statement ensures proper disposal of resources
+            using (StreamWriter writer = new StreamWriter(DataFileName))
+            {
+                // Write descriptive header with clear column names and REARRANGED ORDER
+                // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+                writer.WriteLine("Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours");
+
+                // Write each person's data using their ToCsvString method
+                foreach (var person in people)
+                {
+                    writer.WriteLine(person.ToCsvString());
+                }
+            }
+            Console.WriteLine("Data saved successfully."); // For debugging
         }
+        catch (Exception excep)
+        {
+            Console.WriteLine($"Error while saving data: {excep.Message}");
+        }
+    }
+
+    // ---------------------------------------------------------------------------------
+    // FILE INPUT/OUTPUT METHOD 2: For loading records from CSV file using StreamReader
+    // This method reads the CSV file and recreates the Person objects
+    // ---------------------------------------------------------------------------------
+    static void LoadDataFromFile()
+    {
+        // Check if file exists before trying to read
+        if (!File.Exists(DataFileName))
+        {
+            Console.WriteLine("No existing data file found. Starting with empty records.");
+            return;
+        }
+
+        try
+        {
+            // Using StreamReader to read data from file
+            // The 'using' statement ensures proper disposal of resources
+            using (StreamReader reader = new StreamReader(DataFileName))
+            {
+                // Read and skip header line
+                string header = reader.ReadLine();
+                
+                // Clear existing data before loading
+                people.Clear();
+                
+                // Track the highest ID to set nextId correctly
+                int maxId = 0;
+
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    // Skip empty lines
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    // Split CSV line into fields
+                    string[] fields = line.Split(',');
+
+                    // Ensuring I have at least the basic fields
+                    if (fields.Length < 5)
+                        continue;
+
+                    // Parse ID and create appropriate object based on role
+                    if (int.TryParse(fields[0], out int id))
+                    {
+                        Person person = null;
+                        string role = fields[1];
+
+                        // Create the appropriate derived class based on role
+                        switch (role.ToLower())
+                        {
+                            case "teacher":
+                                person = new Teacher(id);
+                                break;
+                            case "admin":
+                                person = new Admin(id);
+                                break;
+                            case "student":
+                                person = new Student(id);
+                                break;
+                            default:
+                                continue; // Skip unknown roles
+                        }
+
+                        // Populate the object from CSV data
+                        person.FromCsv(fields);
+
+                        // Add to collection
+                        people.Add(person);
+
+                        // Update maxId to ensure nextId is correct
+                        if (id > maxId)
+                            maxId = id;
+                    }
+                }
+
+                // Set nextId to one more than the highest ID found
+                nextId = maxId + 1;
+                
+                Console.WriteLine($"Data loaded successfully. {people.Count} records found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            Console.WriteLine("Starting with empty records.");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper method to print table header for better readability. 
+    // Used in ViewAllRecords and ViewRecordsByRole methods
+    // Enhances the display of records in a tabular format
+    // I implemented this after further research on C# console output formatting
+    // --------------------------------------------------------------------------
+    static void PrintTableHeader()
+    {
+        Console.WriteLine("\n------------------------------------------------------------------------------");
+        Console.WriteLine($"{"ID",-5} | {"Role",-10} | {"Name",-20} | {"Telephone",-12} | {"Email",-25}"); // Table Header
+        Console.WriteLine("------------------------------------------------------------------------------");
+    }
 
 }
