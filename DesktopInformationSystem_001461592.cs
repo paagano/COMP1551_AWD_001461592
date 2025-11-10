@@ -140,7 +140,7 @@ public abstract class Person
     // Derived classes will override this to handle their specific fields
     public virtual void FromCsv(string[] fields)
     {
-        // Skip Id and Role as they are set in constructor
+        // Skip Id and Role (fields 0 and 1) as they are set in constructor
         Name = fields[2];
         Telephone = fields[3];
         Email = fields[4];
@@ -231,14 +231,13 @@ public class Teacher : Person
     public override string ToCsvString()
     {
         // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
-        return $"{base.ToCsvString()},{Salary},{Subject1},{Subject2},,,";
-        // Empty fields for: Subject3, EmploymentType, WorkingHours (Teacher doesn't use these)
+        return $"{base.ToCsvString()},{Salary},{Subject1},{Subject2},,,"; // Empty fields for: Subject3, EmploymentType, WorkingHours (Teacher doesn't use these)
     }
 
     // Override method to populate Teacher object from CSV data
     public override void FromCsv(string[] fields)
     {
-        base.FromCsv(fields); // Handle common fields first
+        base.FromCsv(fields); // Read common fields first
         
         // NEW FIELD MAPPING for Teacher:
         // 5: Salary, 6: Subject1, 7: Subject2
@@ -331,14 +330,14 @@ public class Admin : Person
     public override string ToCsvString()
     {
         // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
-        return $"{base.ToCsvString()},{Salary},,,,{EmploymentType},{WorkingHours}";
-        // Empty fields for: Subject1, Subject2, Subject3 (Admin doesn't use these)
+        return $"{base.ToCsvString()},{Salary},,,,{EmploymentType},{WorkingHours}"; // Empty fields for: Subject1, Subject2, Subject3 (Admin doesn't use these)
+        
     }
 
     // Override method to populate Admin object from CSV data
     public override void FromCsv(string[] fields)
     {
-        base.FromCsv(fields); // Handle common fields first
+        base.FromCsv(fields); // Read common fields first
         
         // NEW FIELD MAPPING for Admin:
         // 5: Salary, 9: EmploymentType, 10: WorkingHours
@@ -346,8 +345,7 @@ public class Admin : Person
         {
             if (double.TryParse(fields[5], out double salary)) Salary = salary;
             EmploymentType = fields[9];
-            if (int.TryParse(fields[10], out int hours)) WorkingHours = hours;
-            // Fields 6, 7, 8 are not used by Admin (Subject1, Subject2, Subject3)
+            if (int.TryParse(fields[10], out int hours)) WorkingHours = hours; // Fields 6, 7, 8 are not used by Admin (Subject1, Subject2, Subject3)
         }
     }
 }
@@ -429,18 +427,17 @@ public class Student : Person
         
     }
 
-    // NEW: Override method to convert Student object to CSV format with specific field names
+    // Override method to convert Student object to CSV format with specific field names
     public override string ToCsvString()
     {
         // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
-        return $"{base.ToCsvString()},,{Subject1},{Subject2},{Subject3},,";
-        // Empty fields for: Salary, EmploymentType, WorkingHours (Student doesn't use these)
+        return $"{base.ToCsvString()},,{Subject1},{Subject2},{Subject3},,"; // Empty fields for: Salary, EmploymentType, WorkingHours (Student doesn't use these)
     }
 
     // Override method to populate Student object from CSV data
     public override void FromCsv(string[] fields)
     {
-        base.FromCsv(fields); // Handle common fields first
+        base.FromCsv(fields); // Read common fields first
         
         // NEW FIELD MAPPING for Student:
         // 6: Subject1, 7: Subject2, 8: Subject3
@@ -653,7 +650,7 @@ class Program
         // Finally, store the new person in the list
         people.Add(person);
         
-        // NEW: Save data to file after adding new record to ensure persistence
+        // Save data to file after adding new record to ensure persistence
         SaveDataToFile();
         
         Console.WriteLine($"\nRecord added successfully! Assigned ID: {person.Id}");
@@ -823,7 +820,7 @@ static void ViewRecordsByRole()
     // ==============================================
 
     // ---------------------------------------------------------------------------------
-    // FILE INPUT METHOD: For saving all records to CSV file using StreamWriter
+    // 1. FILE INPUT METHOD: For saving all records to CSV file using StreamWriter
     // This method writes each person's data to a CSV file in a structured format
     // ---------------------------------------------------------------------------------
     static void SaveDataToFile()
@@ -853,7 +850,7 @@ static void ViewRecordsByRole()
     }
 
     // ---------------------------------------------------------------------------------
-    // FILE OUTPUT METHOD: For loading records from CSV file using StreamReader
+    // 2. FILE OUTPUT METHOD: For loading records from CSV file using StreamReader
     // This method reads the CSV file and recreates the Person objects
     // ---------------------------------------------------------------------------------
     static void LoadDataFromFile()
@@ -874,7 +871,7 @@ static void ViewRecordsByRole()
                 // Read and skip header line
                 string header = reader.ReadLine();
                 
-                // Clear existing data before loading
+                // Clear existing data before loading to avoid duplicates
                 people.Clear();
                 
                 // Track the highest ID to set nextId correctly
