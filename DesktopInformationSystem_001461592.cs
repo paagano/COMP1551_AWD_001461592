@@ -468,13 +468,13 @@ class Program
 
     static int nextId = 1; // A counter to assign unique IDs
 
-    // NEW: Constant for CSV file name
+    // Constant for CSV file name
     private const string DataFileName = "education_centre_data.csv";
 
     // Main method
     static void Main()
     {
-        // NEW: Load existing data from CSV file when program starts
+        // Load existing data into 'people' list from CSV file when program starts
         LoadDataFromFile();
 
         bool exit = false; // controls the main loop. Exits when true.
@@ -534,7 +534,7 @@ class Program
             }
         }
 
-        // NEW: Save data to CSV file when program exits
+        // Save data to CSV file when program exits
         SaveDataToFile();
 
         // Exit message
@@ -823,7 +823,7 @@ static void ViewRecordsByRole()
     // ==============================================
 
     // ---------------------------------------------------------------------------------
-    // FILE INPUT/OUTPUT METHOD 1: For saving all records to CSV file using StreamWriter
+    // FILE INPUT METHOD: For saving all records to CSV file using StreamWriter
     // This method writes each person's data to a CSV file in a structured format
     // ---------------------------------------------------------------------------------
     static void SaveDataToFile()
@@ -844,7 +844,7 @@ static void ViewRecordsByRole()
                     writer.WriteLine(person.ToCsvString());
                 }
             }
-            Console.WriteLine("Data saved successfully."); // For debugging
+            Console.WriteLine("Data saved successfully."); // For my debugging
         }
         catch (Exception excep)
         {
@@ -853,7 +853,7 @@ static void ViewRecordsByRole()
     }
 
     // ---------------------------------------------------------------------------------
-    // FILE INPUT/OUTPUT METHOD 2: For loading records from CSV file using StreamReader
+    // FILE OUTPUT METHOD: For loading records from CSV file using StreamReader
     // This method reads the CSV file and recreates the Person objects
     // ---------------------------------------------------------------------------------
     static void LoadDataFromFile()
