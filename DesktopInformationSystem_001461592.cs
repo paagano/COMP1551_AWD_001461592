@@ -129,14 +129,14 @@ public abstract class Person
         if (!string.IsNullOrWhiteSpace(input)) Email = input;
     }
 
-    // NEW: Virtual method to convert object to CSV format for file storage
+    // Virtual method to convert object to CSV format for file storage
     // Derived classes will override this to include their specific fields
     public virtual string ToCsvString()
     {
         return $"{Id},{Role},{Name},{Telephone},{Email}";
     }
 
-    // NEW: Virtual method to populate object from CSV data
+    // Virtual method to populate object from CSV data
     // Derived classes will override this to handle their specific fields
     public virtual void FromCsv(string[] fields)
     {
@@ -227,22 +227,22 @@ public class Teacher : Person
             };
     }
 
-    // NEW: Override method to convert Teacher object to CSV format with specific field names
+    // Override method to convert Teacher object to CSV format with specific field names
     public override string ToCsvString()
     {
-        // NEW FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+        // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
         return $"{base.ToCsvString()},{Salary},{Subject1},{Subject2},,,";
         // Empty fields for: Subject3, EmploymentType, WorkingHours (Teacher doesn't use these)
     }
 
-    // NEW: Override method to populate Teacher object from CSV data
+    // Override method to populate Teacher object from CSV data
     public override void FromCsv(string[] fields)
     {
         base.FromCsv(fields); // Handle common fields first
         
         // NEW FIELD MAPPING for Teacher:
         // 5: Salary, 6: Subject1, 7: Subject2
-        if (fields.Length >= 8) // Ensure we have enough fields
+        if (fields.Length >= 8) // Ensure I have enough fields
         {
             if (double.TryParse(fields[5], out double salary)) Salary = salary;
             Subject1 = fields[6];
@@ -327,22 +327,22 @@ public class Admin : Person
             };
     }
 
-    // NEW: Override method to convert Admin object to CSV format with specific field names
+    // Override method to convert Admin object to CSV format with specific field names
     public override string ToCsvString()
     {
-        // NEW FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+        // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
         return $"{base.ToCsvString()},{Salary},,,,{EmploymentType},{WorkingHours}";
         // Empty fields for: Subject1, Subject2, Subject3 (Admin doesn't use these)
     }
 
-    // NEW: Override method to populate Admin object from CSV data
+    // Override method to populate Admin object from CSV data
     public override void FromCsv(string[] fields)
     {
         base.FromCsv(fields); // Handle common fields first
         
         // NEW FIELD MAPPING for Admin:
         // 5: Salary, 9: EmploymentType, 10: WorkingHours
-        if (fields.Length >= 11) // Ensure we have enough fields
+        if (fields.Length >= 11) // Ensure I have enough fields
         {
             if (double.TryParse(fields[5], out double salary)) Salary = salary;
             EmploymentType = fields[9];
@@ -432,19 +432,19 @@ public class Student : Person
     // NEW: Override method to convert Student object to CSV format with specific field names
     public override string ToCsvString()
     {
-        // NEW FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
+        // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
         return $"{base.ToCsvString()},,{Subject1},{Subject2},{Subject3},,";
         // Empty fields for: Salary, EmploymentType, WorkingHours (Student doesn't use these)
     }
 
-    // NEW: Override method to populate Student object from CSV data
+    // Override method to populate Student object from CSV data
     public override void FromCsv(string[] fields)
     {
         base.FromCsv(fields); // Handle common fields first
         
         // NEW FIELD MAPPING for Student:
         // 6: Subject1, 7: Subject2, 8: Subject3
-        if (fields.Length >= 9) // Ensure we have enough fields
+        if (fields.Length >= 9) // Ensure i have enough fields
         {
             Subject1 = fields[6];
             Subject2 = fields[7];
@@ -834,7 +834,7 @@ static void ViewRecordsByRole()
             // The "using" statement ensures proper disposal of resources
             using (StreamWriter writer = new StreamWriter(DataFileName))
             {
-                // Write descriptive header with clear column names and REARRANGED ORDER
+                // Write descriptive header with clear column names
                 // FORMAT: Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours
                 writer.WriteLine("Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,WorkingHours");
 

@@ -2,3 +2,6 @@ Id,Role,Name,Telephone,Email,Salary,Subject1,Subject2,Subject3,EmploymentType,Wo
 1,Teacher,Olivia Agano,0749875667,olivia@gmail.com,800000,Kiswahili,English,,,
 2,Admin,Anaya Agano,0739828894,anaya@gmail.com,900000,,,,Full-time,8
 3,Student,Ori Agano,07409875667,ori@hotmail.com,,Mathematics,Science,Geography,,
+4,Teacher,Marcus Rashford,0729563873,marcus@gmail.com,900000,Physical Education (PE),English,,,
+5,Admin,Ruben Amorim,073785998,amorim@united.com,900000,,,,Full-time,8
+6,Student,Kobbie Mainoo,0728975891,mainoo@united.com,,Scring Goals,Celebrating Goals,Lifting Trophies,,
