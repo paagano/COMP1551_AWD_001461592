@@ -731,6 +731,7 @@ static void ViewRecordsByRole()
     // Method to edit an existing record
     static void EditRecord()
     {
+        ViewAllRecords(); // Show all records first for user to choose from
         Console.Write("Enter record ID to edit: ");
 
         // Validate ID input
@@ -767,6 +768,7 @@ static void ViewRecordsByRole()
     // Method to delete an existing record
     static void DeleteRecord()
     {
+        ViewAllRecords(); // Show all records first for user to choose from
         Console.Write("Enter record ID to delete: ");
 
         // Validate ID input
